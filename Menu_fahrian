@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kantin Online — Pesan Sekarang</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Public+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FBF6EC;
+    --paper: #FFFFFF;
+    --ink: #2B2118;
+    --ink-soft: #6B5F52;
+    --leaf: #1F6E43;
+    --leaf-dark: #14502F;
+    --turmeric: #E8A33D;
+    --chili: #C1440E;
+    --line: #E4D9C4;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(43,33,24,0.06) 1px, transparent 0);
+    background-size: 22px 22px;
+    color: var(--ink);
+    font-family: 'Public Sans', sans-serif;
+    min-height: 100vh;
+    padding: 32px 16px 60px;
+  }
+  .wrap{ max-width: 960px; margin: 0 auto; }
+
+  header{ text-align:center; margin-bottom: 32px; }
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    text-transform:uppercase;
+    letter-spacing: 0.15em;
+    font-size: 12px;
+    color: var(--leaf);
+    font-weight:700;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: clamp(32px, 6vw, 52px);
+    margin-top: 6px;
+    letter-spacing: -0.01em;
+  }
+  header p{
+    color: var(--ink-soft);
+    margin-top: 8px;
+    font-size: 15px;
+  }
+
+  .layout{
+    display:grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 800px){
+    .layout{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 1px 2px rgba(43,33,24,0.04);
+  }
+
+  .section-label{
+    font-family:'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+  }
+
+  .field{ margin-bottom: 18px; }
+  .field label{
+    display:block;
+    font-weight:600;
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field select{
+    width:100%;
+    padding: 11px 13px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    font-family:'Public Sans', sans-serif;
+    font-size: 15px;
+    background: var(--bg);
+    color: var(--ink);
+    transition: border-color 0.15s ease;
+  }
+  .field input:focus, .field select:focus{
+    outline: none;
+    border-color: var(--leaf);
+  }
+
+  .menu-list{ display:flex; flex-direction:column; gap:10px; margin-bottom: 20px; }
+  .menu-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    cursor:pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .menu-item:has(input:checked){
+    border-color: var(--leaf);
+    background: #F1F7F0;
+  }
+  .menu-item .info{ display:flex; align-items:center; gap:12px; }
+  .menu-item input[type="checkbox"]{ width:18px; height:18px; accent-color: var(--leaf); }
+  .menu-item .name{ font-weight:600; font-size:15px; }
+  .menu-item .desc{ font-size: 12px; color: var(--ink-soft); }
+  .menu-item .price{
+    font-family:'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--chili);
+    white-space:nowrap;
+  }
+  .qty-box{ display:flex; align-items:center; gap:6px; }
+  .qty-box button{
+    width:26px; height:26px; border-radius:6px;
+    border:1.5px solid var(--line); background: var(--paper);
+    font-size: 15px; cursor:pointer; line-height:1;
+  }
+  .qty-box span{ min-width: 18px; text-align:center; font-family:'Space Mono', monospace; font-size:14px; }
+
+  .pay-options{ display:flex; gap: 10px; }
+  .pay-options label{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding: 12px;
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    cursor:pointer;
+    font-weight:600;
+    font-size:14px;
+  }
+  .pay-options input{ accent-color: var(--leaf); }
+  .pay-options label:has(input:checked){
+    border-color: var(--turmeric);
+    background: #FFF6E6;
+  }
+
+  /* Modal QRIS */
+  .modal-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(43,33,24,0.55);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal-box{
+    background: var(--paper);
+    border-radius: 18px;
+    padding: 26px;
+    max-width: 340px;
+    width:100%;
+    text-align:center;
+    box-shadow: 0 12px 40px rgba(43,33,24,0.25);
+  }
+  .modal-box h3{
+    font-family:'Fraunces', serif;
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+  .modal-box .modal-total{
+    font-family:'Space Mono', monospace;
+    color: var(--chili);
+    font-weight:700;
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+  .qris-frame{
+    border: 1.5px dashed var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    background: var(--bg);
+    margin-bottom: 16px;
+    min-height: 200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .qris-frame img{ max-width:100%; border-radius: 8px; }
+  .qris-frame .placeholder{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height:1.5;
+  }
+  .qris-frame .placeholder label{
+    display:inline-block;
+    margin-top:8px;
+    color: var(--leaf);
+    font-weight:700;
+    cursor:pointer;
+    text-decoration: underline;
+  }
+  .modal-box .close-modal{
+    width:100%;
+    padding: 11px;
+    border:none;
+    border-radius: 10px;
+    background: var(--leaf);
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  button.submit{
+    width:100%;
+    margin-top: 6px;
+    padding: 14px;
+    background: var(--leaf);
+    color: #fff;
+    border:none;
+    border-radius: 12px;
+    font-weight:700;
+    font-size: 15px;
+    font-family:'Public Sans', sans-serif;
+    cursor:pointer;
+    transition: background 0.15s ease;
+  }
+  button.submit:hover{ background: var(--leaf-dark); }
+  button.submit:disabled{ background:#B9B0A2; cursor:not-allowed; }
+
+  .error{ color: var(--chili); font-size: 13px; margin-top: 8px; display:none; }
+
+  /* Receipt / Nota */
+  .receipt{
+    position: sticky;
+    top: 24px;
+    background: var(--paper);
+    border-radius: 4px;
+    padding: 26px 22px;
+    font-family: 'Space Mono', monospace;
+    box-shadow: 0 4px 18px rgba(43,33,24,0.10);
+    background-image:
+      repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(0,0,0,0.015) 8px, rgba(0,0,0,0.015) 16px);
+  }
+  .receipt::before{
+    content: "";
+    display:block;
+    height: 10px;
+    margin: -26px -22px 16px;
+    background: repeating-linear-gradient(90deg, var(--paper) 0 8px, transparent 8px 14px);
+  }
+  .receipt h2{
+    font-family:'Fraunces', serif;
+    font-size: 20px;
+    text-align:center;
+    margin-bottom: 2px;
+  }
+  .receipt .sub{
+    text-align:center;
+    font-size:11px;
+    color: var(--ink-soft);
+    margin-bottom: 16px;
+  }
+  .receipt hr{
+    border:none;
+    border-top: 1.5px dashed var(--line);
+    margin: 14px 0;
+  }
+  .receipt .row{
+    display:flex;
+    justify-content:space-between;
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  .receipt .row.muted{ color: var(--ink-soft); }
+  .receipt .items .row{ font-size: 12.5px; }
+  .receipt .empty{
+    text-align:center;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    padding: 10px 0 16px;
+  }
+  .receipt .total{
+    font-size: 16px;
+    font-weight:700;
+    color: var(--chili);
+  }
+  .receipt .stamp{
+    text-align:center;
+    margin-top: 18px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--leaf);
+    text-transform:uppercase;
+  }
+
+  .toast{
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--ink);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    opacity: 0;
+    transition: all 0.25s ease;
+    pointer-events:none;
+  }
+  .toast.show{ opacity:1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Kantin Sekolah</div>
+    <h1>Pesan Menu Hari Ini</h1>
+    <p>Isi data kamu, pilih menu, lalu kirim pesanan.</p>
+  </header>
+
+  <div class="layout">
+    <form class="card" id="orderForm">
+      <div class="section-label">Data Pemesan</div>
+      <div class="field">
+        <label for="nama">Nama</label>
+        <input type="text" id="nama" placeholder="Nama lengkap" required>
+      </div>
+      <div class="field">
+        <label for="kelas">Kelas</label>
+        <input type="text" id="kelas" placeholder="Contoh: 9A" required>
+      </div>
+
+      <div class="section-label" style="margin-top:8px;">Pilih Menu</div>
+      <div class="menu-list" id="menuList"></div>
+
+      <div class="section-label">Pembayaran</div>
+      <div class="pay-options">
+        <label><input type="radio" name="bayar" value="Cash" checked> Cash</label>
+        <label><input type="radio" name="bayar" value="QRIS"> QRIS</label>
+      </div>
+
+      <button type="submit" class="submit" id="submitBtn">Kirim Pesanan</button>
+      <div class="error" id="errorMsg">Isi nama, kelas, dan pilih minimal satu menu ya.</div>
+    </form>
+
+    <div class="receipt">
+      <h2>Nota Pesanan</h2>
+      <div class="sub">Kantin Sekolah · Hari Ini</div>
+      <hr>
+      <div id="receiptCustomer">
+        <div class="row muted"><span>Nama</span><span>—</span></div>
+        <div class="row muted"><span>Kelas</span><span>—</span></div>
+        <div class="row muted"><span>Bayar</span><span>Cash</span></div>
+      </div>
+      <hr>
+      <div class="items" id="receiptItems">
+        <div class="empty">Belum ada menu dipilih</div>
+      </div>
+      <hr>
+      <div class="row total"><span>Total</span><span id="receiptTotal">Rp 0</span></div>
+      <div class="stamp">✓ Siap dikirim</div>
+    </div>
+  </div>
+</div>
+
+<!-- Notifikasi "selesai memesan" yang muncul sebentar di bawah layar -->
+<div class="toast" id="toast">✓ Pesanan selesai! Terima kasih.</div>
+
+<div class="modal-overlay" id="qrisModal">
+  <div class="modal-box">
+    <h3>Scan untuk Bayar</h3>
+    <div class="modal-total" id="modalTotal">Rp 0</div>
+    <div class="qris-frame" id="qrisFrame">
+      <div class="placeholder">Kode QRIS belum diatur di kode.</div>
+    </div>
+    <button type="button" class="close-modal" id="closeModal">Selesai</button>
+  </div>
+</div>
+
+<!-- Modal konfirmasi "pesan lagi" — muncul kalau user sudah pernah
+     pesan sebelumnya di halaman ini, lalu coba pesan lagi -->
+<div class="modal-overlay" id="reorderModal">
+  <div class="modal-box">
+    <h3>Pesan Lagi?</h3>
+    <p style="font-size:13px; color:var(--ink-soft); margin-bottom:18px; line-height:1.5;">
+      Kamu sudah membuat pesanan sebelumnya. Yakin mau membuat pesanan baru lagi?
+    </p>
+    <div style="display:flex; gap:10px;">
+      <button type="button" class="close-modal" id="reorderYes" style="background:var(--leaf);">Ya, Pesan Lagi</button>
+      <button type="button" class="close-modal" id="reorderNo" style="background:#B9B0A2;">Tidak</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // PENGATURAN MENU — hanya diubah lewat kode ini, bukan dari
+  // halaman, jadi pengunjung tidak bisa menambah/menghapus menu.
+  //
+  // Tambah menu baru: tambahkan satu baris { id, name, desc, price }
+  // Hapus menu: hapus baris yang bersangkutan
+  // id harus unik (bebas, misal 'nasgor2')
+  // ============================================================
+  const MENU = [
+    { id:'nasgor', name:'Nasi Goreng', desc:'Nasi goreng telur + kerupuk', price:12000 },
+    { id:'miayam', name:'Mie Ayam', desc:'Mie ayam + pangsit', price:10000 },
+    { id:'ayamgeprek', name:'Ayam Geprek', desc:'Ayam geprek + nasi + sambal', price:13000 },
+    { id:'risoles', name:'Risoles', desc:'Per potong', price:3000 },
+    { id:'esteh', name:'Es Teh Manis', desc:'Segar & manis', price:4000 },
+    { id:'esjeruk', name:'Es Jeruk', desc:'Jeruk peras asli', price:5000 },
+  ];
+
+  // ============================================================
+  // PENGATURAN QRIS — isi salah satu di bawah ini dengan kode QRIS
+  // kamu, ini juga hanya diubah lewat kode, bukan dari halaman.
+  //
+  // Cara 1 (paling mudah): pakai link gambar QRIS kamu, contoh:
+  //   const QRIS_IMAGE = 'https://contoh.com/qris-saya.png';
+  //
+  // Cara 2: convert gambar QRIS ke base64 (cari "convert image to
+  // base64" di Google), lalu tempel hasilnya di sini, contoh:
+  //   const QRIS_IMAGE = 'data:image/png;base64,iVBORw0KGgoAAAANS...';
+  // ============================================================
+  const QRIS_IMAGE = ''; // ← ganti dengan URL atau base64 gambar QRIS kamu
+
+  const state = {};
+  MENU.forEach(m => state[m.id] = 0);
+
+  const menuListEl = document.getElementById('menuList');
+  const rupiah = n => 'Rp ' + n.toLocaleString('id-ID');
+
+  function renderMenu(){
+    menuListEl.innerHTML = MENU.map(m => `
+      <label class="menu-item" for="chk-${m.id}">
+        <div class="info">
+          <input type="checkbox" id="chk-${m.id}" data-id="${m.id}" ${state[m.id] > 0 ? 'checked' : ''}>
+          <div>
+            <div class="name">${m.name}</div>
+            <div class="desc">${m.desc}</div>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div class="price">${rupiah(m.price)}</div>
+          <div class="qty-box">
+            <button type="button" data-action="dec" data-id="${m.id}">−</button>
+            <span>${state[m.id] || 1}</span>
+            <button type="button" data-action="inc" data-id="${m.id}">+</button>
+          </div>
+        </div>
+      </label>
+    `).join('');
+  }
+
+  function handleMenuClick(e){
+    const btn = e.target.closest('button[data-action]');
+    if(btn){
+      e.preventDefault();
+      const id = btn.dataset.id;
+      const current = state[id] || 1;
+      if(btn.dataset.action === 'inc') state[id] = current + 1;
+      if(btn.dataset.action === 'dec') state[id] = Math.max(1, current - 1);
+      // reflect qty even if not checked yet
+      const chk = document.getElementById('chk-' + id);
+      if(chk.checked){ renderMenu(); updateReceipt(); }
+      else {
+        const span = btn.parentElement.querySelector('span');
+        span.textContent = state[id];
+      }
+      return;
+    }
+    const chk = e.target.closest('input[type="checkbox"]');
+    if(chk){
+      const id = chk.dataset.id;
+      if(chk.checked && !state[id]) state[id] = 1;
+      if(!chk.checked) state[id] = 0;
+      updateReceipt();
+    }
+  }
+  menuListEl.addEventListener('click', handleMenuClick);
+  menuListEl.addEventListener('change', handleMenuClick);
+
+  function updateReceipt(){
+    const nama = document.getElementById('nama').value.trim();
+    const kelas = document.getElementById('kelas').value.trim();
+    const bayar = document.querySelector('input[name="bayar"]:checked').value;
+
+    document.getElementById('receiptCustomer').innerHTML = `
+      <div class="row ${nama ? '' : 'muted'}"><span>Nama</span><span>${nama || '—'}</span></div>
+      <div class="row ${kelas ? '' : 'muted'}"><span>Kelas</span><span>${kelas || '—'}</span></div>
+      <div class="row"><span>Bayar</span><span>${bayar}</span></div>
+    `;
+
+    const chosen = MENU.filter(m => state[m.id] > 0);
+    const itemsEl = document.getElementById('receiptItems');
+    if(chosen.length === 0){
+      itemsEl.innerHTML = '<div class="empty">Belum ada menu dipilih</div>';
+    } else {
+      itemsEl.innerHTML = chosen.map(m => `
+        <div class="row">
+          <span>${m.name} ×${state[m.id]}</span>
+          <span>${rupiah(m.price * state[m.id])}</span>
+        </div>
+      `).join('');
+    }
+
+    const total = chosen.reduce((sum, m) => sum + m.price * state[m.id], 0);
+    document.getElementById('receiptTotal').textContent = rupiah(total);
+  }
+
+  ['nama','kelas'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateReceipt);
+  });
+  document.querySelectorAll('input[name="bayar"]').forEach(r => {
+    r.addEventListener('change', updateReceipt);
+  });
+
+  // Menampilkan gambar QR pembayaran di dalam jendela/modal.
+  // Gambarnya diambil dari variabel QRIS_IMAGE di atas (yang kamu
+  // isi sendiri lewat kode) — kalau masih kosong, tampil pesan placeholder.
+  function renderQrisFrame(){
+    const frame = document.getElementById('qrisFrame');
+    if(QRIS_IMAGE){
+      frame.innerHTML = `<img src="${QRIS_IMAGE}" alt="Kode QRIS">`;
+    } else {
+      frame.innerHTML = `<div class="placeholder">Kode QRIS belum diatur di kode.</div>`;
+    }
+  }
+
+  const qrisModal = document.getElementById('qrisModal');
+  document.getElementById('closeModal').addEventListener('click', () => {
+    qrisModal.classList.remove('show');
+  });
+  qrisModal.addEventListener('click', e => {
+    if(e.target === qrisModal) qrisModal.classList.remove('show');
+  });
+
+  // Menandai apakah user di halaman ini sudah pernah menyelesaikan
+  // satu pesanan. Selama halaman belum di-refresh, nilainya tetap
+  // "true" — dipakai untuk memicu pertanyaan "mau pesan lagi?".
+  let hasOrdered = false;
+
+  const reorderModal = document.getElementById('reorderModal');
+
+  // Ini yang benar-benar mengirim pesanan: menampilkan notifikasi
+  // "selesai memesan" (toast) untuk Cash, atau membuka jendela QR
+  // untuk QRIS. Dipanggil setelah semua pengecekan/konfirmasi lolos.
+  function finalizeOrder(){
+    const bayar = document.querySelector('input[name="bayar"]:checked').value;
+
+    if(bayar === 'QRIS'){
+      const total = MENU.reduce((sum, m) => sum + m.price * (state[m.id] || 0), 0);
+      document.getElementById('modalTotal').textContent = rupiah(total);
+      renderQrisFrame();
+      qrisModal.classList.add('show');
+    } else {
+      // NOTIFIKASI SELESAI MEMESAN (untuk pembayaran Cash)
+      const toast = document.getElementById('toast');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // tandai sudah pernah pesan, dipakai buat cek di submit berikutnya
+    hasOrdered = true;
+  }
+
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    const nama = document.getElementById('nama').value.trim();
+    const kelas = document.getElementById('kelas').value.trim();
+    const anyChosen = MENU.some(m => state[m.id] > 0);
+    const errorEl = document.getElementById('errorMsg');
+
+    if(!nama || !kelas || !anyChosen){
+      errorEl.style.display = 'block';
+      return;
+    }
+    errorEl.style.display = 'none';
+
+    // KONFIRMASI PESAN LAGI:
+    // kalau user sebelumnya sudah pernah menyelesaikan pesanan di
+    // halaman ini, tanya dulu "mau pesan lagi? ya/tidak" sebelum
+    // pesanan baru diproses. Kalau ini pesanan pertama, langsung
+    // diproses tanpa perlu ditanya.
+    if(hasOrdered){
+      reorderModal.classList.add('show');
+      return;
+    }
+
+    finalizeOrder();
+  });
+
+  // Tombol "Ya, Pesan Lagi" di modal konfirmasi → lanjutkan pesanan
+  document.getElementById('reorderYes').addEventListener('click', () => {
+    reorderModal.classList.remove('show');
+    finalizeOrder();
+  });
+  // Tombol "Tidak" → batalkan, tidak jadi kirim pesanan baru
+  document.getElementById('reorderNo').addEventListener('click', () => {
+    reorderModal.classList.remove('show');
+  });
+
+  renderMenu();
+  updateReceipt();
+</script>
+</body>
+</html>
+
